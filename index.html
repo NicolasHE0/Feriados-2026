@@ -1,431 +1,384 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calendario Escolar · Nicolás Henker</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0c0f14;
-    --surface: #141920;
-    --surface2: #1a2130;
-    --border: #2a3548;
-    --accent: #e8c97a;
-    --accent2: #6eb5ff;
-    --accent3: #ff7c6e;
-    --text: #e8e4dc;
-    --muted: #7a8899;
-    --green: #6fcf97;
-  }
+:root { --transition: 0.35s ease; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+[data-theme="dark"] {
+  --bg: #0c0f14; --surface: #141920; --surface2: #1a2130; --border: #2a3548;
+  --accent: #e8c97a; --accent2: #6eb5ff; --accent3: #ff7c6e;
+  --text: #e8e4dc; --muted: #7a8899; --green: #6fcf97;
+}
+[data-theme="light"] {
+  --bg: #f5f2ec; --surface: #ffffff; --surface2: #eee9e0; --border: #ddd7cc;
+  --accent: #b8860b; --accent2: #2563a8; --accent3: #c0392b;
+  --text: #1a1a1a; --muted: #7a7060; --green: #1e7a45;
+}
+[data-mode="vacation"][data-theme="dark"] {
+  --bg: #0d1510; --surface: #131d15; --surface2: #192619; --border: #2a4030;
+  --accent: #7edcb0; --accent2: #f0c97a; --accent3: #ff9f6e;
+  --text: #e0ede6; --muted: #6a8a72; --green: #7edcb0;
+}
+[data-mode="vacation"][data-theme="light"] {
+  --bg: #edf7f0; --surface: #ffffff; --surface2: #dff0e5; --border: #c0ddc8;
+  --accent: #1e7a45; --accent2: #b8860b; --accent3: #c0392b;
+  --text: #0f2617; --muted: #5a7a62; --green: #1e7a45;
+}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    padding: 0 0 80px 0;
-    overflow-x: hidden;
-  }
+* { margin:0; padding:0; box-sizing:border-box; }
 
-  /* Fondo con ruido sutil */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-  }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh; padding-bottom: 80px; overflow-x: hidden;
+  transition: background var(--transition), color var(--transition);
+}
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
 
-  /* HEADER */
-  header {
-    position: relative;
-    z-index: 1;
-    padding: 52px 40px 40px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 24px;
-  }
+/* VACATION BANNER */
+.vac-top { display:none; position:relative; z-index:2;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: var(--bg); text-align:center; padding:13px 20px;
+  font-family:'DM Mono',monospace; font-size:13px; letter-spacing:0.07em; font-weight:500;
+}
+[data-mode="vacation"] .vac-top { display:block; }
 
-  .header-left h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(28px, 4vw, 48px);
-    font-weight: 900;
-    color: var(--text);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-  }
+/* HEADER */
+header {
+  position:relative; z-index:1; padding:44px 40px 36px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:flex-start; justify-content:space-between;
+  flex-wrap:wrap; gap:20px;
+  transition:border-color var(--transition);
+}
+.header-left h1 {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(26px,4vw,46px); font-weight:900;
+  line-height:1.1; letter-spacing:-0.02em;
+}
+.header-left h1 span { color:var(--accent); transition:color var(--transition); }
+.subtitle {
+  margin-top:8px; font-size:12px; color:var(--muted);
+  font-family:'DM Mono',monospace; letter-spacing:0.08em; text-transform:uppercase;
+  transition:color var(--transition);
+}
+.header-right { display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+.header-controls { display:flex; gap:10px; align-items:center; }
+.theme-btn {
+  background:var(--surface2); border:1px solid var(--border); color:var(--text);
+  font-size:15px; width:34px; height:34px; border-radius:50%; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background var(--transition), border-color var(--transition);
+}
+.theme-btn:hover { background:var(--border); }
+.fecha-hoy-label {
+  font-family:'DM Mono',monospace; font-size:11px; color:var(--muted);
+  text-transform:uppercase; letter-spacing:0.1em; text-align:right;
+  transition:color var(--transition);
+}
+.fecha-hoy-valor {
+  font-family:'Playfair Display',serif; font-size:clamp(16px,2.2vw,24px);
+  color:var(--accent); font-weight:700; text-align:right;
+  transition:color var(--transition);
+}
 
-  .header-left h1 span {
-    color: var(--accent);
-  }
+/* PROGRESO */
+.progreso-wrap {
+  position:relative; z-index:1; padding:20px 40px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  transition:border-color var(--transition);
+}
+.progreso-label {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--muted); white-space:nowrap;
+  transition:color var(--transition);
+}
+.progreso-bar-outer {
+  flex:1; min-width:100px; height:6px; background:var(--surface2);
+  border-radius:3px; overflow:hidden; transition:background var(--transition);
+}
+.progreso-bar-inner {
+  height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border-radius:3px; transition:width 1.2s cubic-bezier(.4,0,.2,1), background var(--transition);
+}
+.progreso-pct {
+  font-family:'DM Mono',monospace; font-size:12px; color:var(--accent);
+  white-space:nowrap; min-width:40px; text-align:right;
+  transition:color var(--transition);
+}
+.semanas-info {
+  font-family:'DM Mono',monospace; font-size:10px; color:var(--muted);
+  white-space:nowrap; transition:color var(--transition);
+}
 
-  .header-left .subtitle {
-    margin-top: 8px;
-    font-size: 13px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
+/* HERO */
+.hero {
+  position:relative; z-index:1;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:2px; background:var(--border); border-bottom:2px solid var(--border);
+  transition:background var(--transition);
+}
+.hero-card {
+  background:var(--surface); padding:36px 32px;
+  position:relative; overflow:hidden;
+  transition:background var(--transition);
+}
+.hero-card:hover { background:var(--surface2); }
+.hero-card::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
+}
+.c-holiday::after { background:var(--accent); }
+.c-winter::after  { background:var(--accent2); }
+.c-end::after     { background:var(--accent3); }
+.card-label {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:14px;
+  transition:color var(--transition);
+}
+.card-days {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(52px,7vw,80px); font-weight:900;
+  line-height:1; margin-bottom:10px; transition:color var(--transition);
+}
+.c-holiday .card-days { color:var(--accent); }
+.c-winter  .card-days { color:var(--accent2); }
+.c-end     .card-days { color:var(--accent3); }
+.card-days .unit {
+  font-family:'DM Sans',sans-serif; font-size:16px; font-weight:300;
+  color:var(--muted); vertical-align:bottom; margin-left:5px;
+}
+.card-event-name {
+  font-size:14px; font-weight:500; color:var(--text);
+  margin-bottom:3px; transition:color var(--transition);
+}
+.card-event-date {
+  font-family:'DM Mono',monospace; font-size:11px; color:var(--muted);
+  transition:color var(--transition);
+}
 
-  .header-right {
-    text-align: right;
-  }
+/* PRÓXIMOS 3 */
+.proximos-wrap {
+  position:relative; z-index:1;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:2px; background:var(--border); border-bottom:1px solid var(--border);
+  transition:background var(--transition);
+}
+.proximo-item {
+  background:var(--surface2); padding:18px 24px;
+  display:flex; align-items:center; gap:16px;
+  transition:background var(--transition);
+}
+.proximo-num {
+  font-family:'Playfair Display',serif; font-size:36px; font-weight:700;
+  color:var(--accent); min-width:52px; line-height:1;
+  transition:color var(--transition);
+}
+.proximo-num small {
+  font-family:'DM Mono',monospace; font-size:9px; color:var(--muted);
+  display:block; letter-spacing:0.08em; text-transform:uppercase;
+}
+.proximo-info .nombre {
+  font-size:13px; font-weight:500; color:var(--text);
+  margin-bottom:2px; transition:color var(--transition);
+}
+.proximo-info .fecha-str {
+  font-family:'DM Mono',monospace; font-size:11px; color:var(--muted);
+  transition:color var(--transition);
+}
 
-  .fecha-hoy {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 4px;
-  }
+/* SECTION TITLE */
+.section-title {
+  position:relative; z-index:1; padding:36px 40px 18px;
+  display:flex; align-items:center; gap:16px;
+}
+.section-title h2 {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.18em;
+  text-transform:uppercase; color:var(--muted); white-space:nowrap;
+  transition:color var(--transition);
+}
+.section-title::after {
+  content:''; flex:1; height:1px; background:var(--border);
+  transition:background var(--transition);
+}
 
-  .fecha-valor {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(18px, 2.5vw, 28px);
-    color: var(--accent);
-    font-weight: 700;
-  }
+/* AGREGAR ASUETO */
+.agregar-wrap {
+  position:relative; z-index:1; margin:0 40px 8px;
+  background:var(--surface); border:1px solid var(--border); border-radius:4px;
+  overflow:hidden; transition:background var(--transition), border-color var(--transition);
+}
+.agregar-toggle {
+  width:100%; background:none; border:none; padding:16px 24px;
+  display:flex; align-items:center; gap:10px; cursor:pointer;
+  color:var(--muted); font-family:'DM Mono',monospace; font-size:11px;
+  letter-spacing:0.12em; text-transform:uppercase; text-align:left;
+  transition:color var(--transition), background var(--transition);
+}
+.agregar-toggle:hover { background:var(--surface2); color:var(--accent); }
+.agregar-icon { font-size:18px; color:var(--accent); transition:transform 0.25s, color var(--transition); }
+.agregar-toggle.open .agregar-icon { transform:rotate(45deg); }
+.agregar-form {
+  display:none; padding:0 24px 20px;
+  gap:12px; flex-wrap:wrap; align-items:flex-end;
+}
+.agregar-form.visible { display:flex; }
+.form-field { display:flex; flex-direction:column; gap:6px; flex:1; min-width:160px; }
+.form-field label {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--muted); transition:color var(--transition);
+}
+.form-field input {
+  background:var(--surface2); border:1px solid var(--border); color:var(--text);
+  font-family:'DM Sans',sans-serif; font-size:13px; padding:9px 12px;
+  border-radius:3px; outline:none;
+  transition:border-color 0.2s, background var(--transition), color var(--transition);
+}
+.form-field input:focus { border-color:var(--accent); }
+.form-btn {
+  background:var(--accent); color:var(--bg); border:none; padding:9px 20px;
+  font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.1em;
+  text-transform:uppercase; border-radius:3px; cursor:pointer; font-weight:500;
+  height:fit-content; transition:opacity 0.2s, background var(--transition);
+}
+.form-btn:hover { opacity:0.85; }
 
-  /* HERO CARDS */
-  .hero {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2px;
-    background: var(--border);
-    border-bottom: 1px solid var(--border);
-  }
+/* LISTA FERIADOS */
+.feriados-grid {
+  position:relative; z-index:1;
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr));
+  gap:2px; background:var(--border);
+  border:1px solid var(--border); margin:0 40px;
+  border-radius:4px; overflow:hidden;
+  transition:background var(--transition), border-color var(--transition);
+}
+.feriado-item {
+  background:var(--surface); padding:18px 22px;
+  display:flex; align-items:center; gap:18px;
+  transition:background var(--transition); position:relative;
+}
+.feriado-item:hover { background:var(--surface2); }
+.feriado-item.pasado { opacity:0.3; }
+.feriado-item.hoy {
+  background:rgba(232,201,122,0.07); border-left:3px solid var(--accent);
+}
+.feriado-item.asueto { background:rgba(110,181,255,0.04); }
+.feriado-num {
+  font-family:'Playfair Display',serif; font-size:28px; font-weight:700;
+  min-width:52px; text-align:center; color:var(--muted); line-height:1;
+  transition:color var(--transition);
+}
+.feriado-item.proximo .feriado-num,
+.feriado-item.hoy     .feriado-num { color:var(--accent); }
+.feriado-dias-lbl {
+  font-family:'DM Mono',monospace; font-size:8px; color:var(--muted);
+  text-transform:uppercase; letter-spacing:0.1em; text-align:center; margin-top:2px;
+  transition:color var(--transition);
+}
+.feriado-info { flex:1; }
+.feriado-nombre {
+  font-size:13px; font-weight:500; color:var(--text);
+  margin-bottom:2px; line-height:1.3; transition:color var(--transition);
+}
+.feriado-fecha-str {
+  font-family:'DM Mono',monospace; font-size:10px; color:var(--muted);
+  transition:color var(--transition);
+}
+.feriado-tipo {
+  font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.09em;
+  text-transform:uppercase; color:var(--green);
+  background:rgba(111,207,151,0.08); padding:2px 7px; border-radius:2px;
+  white-space:nowrap; transition:color var(--transition), background var(--transition);
+}
+.feriado-item.asueto .feriado-tipo {
+  color:var(--accent2); background:rgba(110,181,255,0.08);
+}
+.delete-btn {
+  background:none; border:none; color:var(--muted); cursor:pointer;
+  font-size:13px; opacity:0; padding:4px; border-radius:3px;
+  transition:opacity 0.2s, color 0.2s; line-height:1;
+}
+.feriado-item:hover .delete-btn { opacity:1; }
+.delete-btn:hover { color:var(--accent3); }
 
-  .hero-card {
-    background: var(--surface);
-    padding: 40px 36px;
-    position: relative;
-    overflow: hidden;
-    transition: background 0.3s;
-  }
+/* VAC BANNER */
+.vac-section-banner {
+  position:relative; z-index:1; margin:0 40px;
+  padding:28px 32px;
+  background:linear-gradient(135deg,rgba(110,181,255,0.07),rgba(110,181,255,0.02));
+  border:1px solid rgba(110,181,255,0.2); border-radius:4px;
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:16px;
+  transition:background var(--transition), border-color var(--transition);
+}
+.vac-label {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--accent2); margin-bottom:6px;
+  transition:color var(--transition);
+}
+.vac-nombre {
+  font-family:'Playfair Display',serif; font-size:22px; font-weight:700;
+  color:var(--text); margin-bottom:3px; transition:color var(--transition);
+}
+.vac-fechas {
+  font-family:'DM Mono',monospace; font-size:11px; color:var(--muted);
+  transition:color var(--transition);
+}
+.vac-contador { text-align:right; }
+.vac-dias-big {
+  font-family:'Playfair Display',serif; font-size:56px; font-weight:900;
+  color:var(--accent2); line-height:1; transition:color var(--transition);
+}
+.vac-dias-lbl {
+  font-family:'DM Mono',monospace; font-size:10px; color:var(--muted);
+  text-transform:uppercase; letter-spacing:0.1em;
+  transition:color var(--transition);
+}
 
-  .hero-card:hover {
-    background: var(--surface2);
-  }
+/* FOOTER */
+footer {
+  position:relative; z-index:1; margin-top:60px;
+  padding:22px 40px; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:10px;
+  transition:border-color var(--transition);
+}
+footer p {
+  font-family:'DM Mono',monospace; font-size:10px; color:var(--muted);
+  letter-spacing:0.07em; transition:color var(--transition);
+}
+.dot { color:var(--accent); margin:0 7px; }
 
-  .hero-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-  }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.hero-card { animation:fadeUp 0.5s ease forwards; }
+.hero-card:nth-child(1) { animation-delay:0.04s; }
+.hero-card:nth-child(2) { animation-delay:0.09s; }
+.hero-card:nth-child(3) { animation-delay:0.14s; }
 
-  .hero-card.next-holiday::after { background: var(--accent); }
-  .hero-card.winter::after { background: var(--accent2); }
-  .hero-card.end-year::after { background: var(--accent3); }
-
-  .card-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 16px;
-  }
-
-  .card-days {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(56px, 8vw, 88px);
-    font-weight: 900;
-    line-height: 1;
-    margin-bottom: 8px;
-  }
-
-  .hero-card.next-holiday .card-days { color: var(--accent); }
-  .hero-card.winter .card-days { color: var(--accent2); }
-  .hero-card.end-year .card-days { color: var(--accent3); }
-
-  .card-days .unit {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 18px;
-    font-weight: 300;
-    color: var(--muted);
-    vertical-align: bottom;
-    margin-left: 6px;
-    letter-spacing: 0.05em;
-  }
-
-  .card-event-name {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-
-  .card-event-date {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .badge-today {
-    display: inline-block;
-    background: var(--accent);
-    color: var(--bg);
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 2px;
-    font-weight: 500;
-    margin-bottom: 10px;
-  }
-
-  /* SECTION TITLE */
-  .section-title {
-    position: relative;
-    z-index: 1;
-    padding: 40px 40px 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .section-title h2 {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* FERIADOS LIST */
-  .feriados-grid {
-    position: relative;
-    z-index: 1;
-    padding: 0 40px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    margin: 0 40px;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  .feriado-item {
-    background: var(--surface);
-    padding: 20px 24px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    transition: background 0.2s;
-    position: relative;
-  }
-
-  .feriado-item:hover {
-    background: var(--surface2);
-  }
-
-  .feriado-item.pasado {
-    opacity: 0.35;
-  }
-
-  .feriado-item.hoy {
-    background: rgba(232, 201, 122, 0.07);
-    border-left: 3px solid var(--accent);
-  }
-
-  .feriado-item.asueto {
-    background: rgba(110, 181, 255, 0.05);
-  }
-
-  .feriado-item.asueto .feriado-tipo {
-    color: var(--accent2);
-  }
-
-  .feriado-numero {
-    font-family: 'Playfair Display', serif;
-    font-size: 32px;
-    font-weight: 700;
-    min-width: 60px;
-    text-align: center;
-    color: var(--muted);
-    line-height: 1;
-  }
-
-  .feriado-item.proximo .feriado-numero {
-    color: var(--accent);
-  }
-
-  .feriado-item.hoy .feriado-numero {
-    color: var(--accent);
-  }
-
-  .feriado-dias-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    text-align: center;
-    margin-top: 2px;
-  }
-
-  .feriado-info {
-    flex: 1;
-  }
-
-  .feriado-nombre {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text);
-    margin-bottom: 3px;
-    line-height: 1.3;
-  }
-
-  .feriado-fecha-str {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-  }
-
-  .feriado-tipo {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--green);
-    background: rgba(111, 207, 151, 0.08);
-    padding: 2px 7px;
-    border-radius: 2px;
-  }
-
-  /* VACACIONES */
-  .vacaciones-banner {
-    position: relative;
-    z-index: 1;
-    margin: 0 40px;
-    padding: 32px 36px;
-    background: linear-gradient(135deg, rgba(110, 181, 255, 0.08), rgba(110, 181, 255, 0.03));
-    border: 1px solid rgba(110, 181, 255, 0.2);
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-
-  .vac-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent2);
-    margin-bottom: 8px;
-  }
-
-  .vac-nombre {
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-
-  .vac-fechas {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .vac-contador {
-    text-align: right;
-  }
-
-  .vac-dias-big {
-    font-family: 'Playfair Display', serif;
-    font-size: 64px;
-    font-weight: 900;
-    color: var(--accent2);
-    line-height: 1;
-  }
-
-  .vac-dias-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    text-align: right;
-  }
-
-  /* FOOTER */
-  footer {
-    position: relative;
-    z-index: 1;
-    margin-top: 60px;
-    padding: 24px 40px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  footer p {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-  }
-
-  .dot { color: var(--accent); margin: 0 8px; }
-
-  /* Animaciones */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .hero-card, .feriado-item, .vacaciones-banner {
-    animation: fadeUp 0.5s ease forwards;
-  }
-
-  .hero-card:nth-child(1) { animation-delay: 0.05s; }
-  .hero-card:nth-child(2) { animation-delay: 0.1s; }
-  .hero-card:nth-child(3) { animation-delay: 0.15s; }
-
-  @media (max-width: 600px) {
-    header { padding: 32px 20px; }
-    .feriados-grid { margin: 0 20px; }
-    .section-title { padding: 32px 20px 16px; }
-    .vacaciones-banner { margin: 0 20px; }
-    footer { padding: 20px 20px; }
-    .vac-contador { text-align: left; }
-    .vac-dias-label { text-align: left; }
-  }
+@media (max-width:600px) {
+  header,.progreso-wrap,.section-title,footer { padding-left:20px; padding-right:20px; }
+  .feriados-grid,.agregar-wrap,.vac-section-banner { margin-left:20px; margin-right:20px; }
+  .vac-contador { text-align:left; }
+  .hero-card { padding:28px 22px; }
+}
 </style>
 </head>
 <body>
+
+<div class="vac-top" id="vac-top">
+  🌿 ¡Estás de vacaciones de invierno! Descansá — quedan <span id="vac-top-dias">?</span> días.
+</div>
+<div id="dia-libre-banner" style="display:none;position:relative;z-index:2;text-align:center;padding:13px 20px;font-family:'DM Mono',monospace;font-size:13px;letter-spacing:0.07em;font-weight:500;"></div>
 
 <header>
   <div class="header-left">
@@ -433,223 +386,306 @@
     <p class="subtitle">3° Economía &nbsp;·&nbsp; Instituto Privado Emanuel &nbsp;·&nbsp; Oberá, Misiones</p>
   </div>
   <div class="header-right">
-    <p class="fecha-hoy">Hoy es</p>
-    <p class="fecha-valor" id="hoy-fecha">—</p>
+    <div class="header-controls">
+      <button class="theme-btn" id="theme-btn" title="Cambiar tema">☀️</button>
+    </div>
+    <p class="fecha-hoy-label">Hoy es</p>
+    <p class="fecha-hoy-valor" id="hoy-fecha">—</p>
   </div>
 </header>
 
-<!-- HERO CARDS -->
-<div class="hero">
-  <div class="hero-card next-holiday" id="card-proximo">
-    <p class="card-label">Próximo feriado / asueto</p>
-    <div id="card-proximo-dias" class="card-days">—<span class="unit">días</span></div>
-    <p class="card-event-name" id="card-proximo-nombre">—</p>
-    <p class="card-event-date" id="card-proximo-fecha">—</p>
+<div class="progreso-wrap">
+  <span class="progreso-label">Año escolar 2026</span>
+  <div class="progreso-bar-outer">
+    <div class="progreso-bar-inner" id="progreso-bar" style="width:0%"></div>
   </div>
-  <div class="hero-card winter" id="card-invierno">
+  <span class="progreso-pct" id="progreso-pct">0%</span>
+  <span class="semanas-info" id="semanas-info">—</span>
+</div>
+
+<div class="hero">
+  <div class="hero-card c-holiday">
+    <p class="card-label">Próximo feriado / asueto</p>
+    <div class="card-days" id="h-dias">—<span class="unit">días</span></div>
+    <p class="card-event-name" id="h-nombre">—</p>
+    <p class="card-event-date" id="h-fecha">—</p>
+  </div>
+  <div class="hero-card c-winter">
     <p class="card-label">Vacaciones de invierno</p>
-    <div id="card-invierno-dias" class="card-days">—<span class="unit">días</span></div>
-    <p class="card-event-name">Inicio vacaciones de invierno</p>
+    <div class="card-days" id="w-dias">—<span class="unit">días</span></div>
+    <p class="card-event-name" id="w-nombre">Inicio vacaciones de invierno</p>
     <p class="card-event-date">13 de julio de 2026</p>
   </div>
-  <div class="hero-card end-year" id="card-fin">
+  <div class="hero-card c-end">
     <p class="card-label">Fin de clases</p>
-    <div id="card-fin-dias" class="card-days">—<span class="unit">días</span></div>
+    <div class="card-days" id="e-dias">—<span class="unit">días</span></div>
     <p class="card-event-name">Último día de clases</p>
     <p class="card-event-date">4 de diciembre de 2026</p>
   </div>
 </div>
 
-<!-- VACACIONES DE INVIERNO BANNER -->
+<div class="section-title"><h2>Próximos eventos</h2></div>
+<div class="proximos-wrap" id="proximos-wrap"></div>
+
 <div class="section-title"><h2>Vacaciones de invierno 2026</h2></div>
-<div class="vacaciones-banner">
+<div class="vac-section-banner">
   <div>
     <p class="vac-label">Receso escolar</p>
     <p class="vac-nombre">Vacaciones de Invierno</p>
     <p class="vac-fechas">13 de julio &nbsp;→&nbsp; 26 de julio de 2026 &nbsp;·&nbsp; 14 días de descanso</p>
   </div>
   <div class="vac-contador">
-    <div class="vac-dias-big" id="vac-invierno-num">—</div>
-    <p class="vac-dias-label" id="vac-invierno-label">días para el inicio</p>
+    <div class="vac-dias-big" id="vac-num">—</div>
+    <p class="vac-dias-lbl" id="vac-lbl">días para el inicio</p>
   </div>
 </div>
 
-<!-- FERIADOS -->
 <div class="section-title"><h2>Todos los feriados y asuetos 2026</h2></div>
+
+<div class="agregar-wrap">
+  <button class="agregar-toggle" id="agregar-toggle">
+    <span class="agregar-icon">+</span>
+    Agregar asueto institucional
+  </button>
+  <div class="agregar-form" id="agregar-form">
+    <div class="form-field">
+      <label>Fecha</label>
+      <input type="date" id="input-fecha" min="2026-01-01" max="2026-12-31">
+    </div>
+    <div class="form-field">
+      <label>Nombre del asueto</label>
+      <input type="text" id="input-nombre" placeholder="Ej: Día del Maestro">
+    </div>
+    <button class="form-btn" id="agregar-btn">Agregar</button>
+  </div>
+</div>
+
 <div class="feriados-grid" id="feriados-lista"></div>
 
 <footer>
   <p>Instituto Privado Emanuel <span class="dot">·</span> 3° Economía <span class="dot">·</span> Año Lectivo 2026</p>
-  <p id="footer-update">Actualizado automáticamente</p>
+  <p id="footer-update">—</p>
 </footer>
 
 <script>
-  // ========== DATOS ==========
-  const DIAS_SEMANA = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DIAS_S = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MESES  = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
-  const feriados = [
-    { fecha: '2026-01-01', nombre: 'Año Nuevo', tipo: 'inamovible' },
-    { fecha: '2026-02-16', nombre: 'Carnaval', tipo: 'inamovible' },
-    { fecha: '2026-02-17', nombre: 'Carnaval', tipo: 'inamovible' },
-    { fecha: '2026-03-23', nombre: 'Día no laborable turístico', tipo: 'turístico' },
-    { fecha: '2026-03-24', nombre: 'Día Nac. de la Memoria por la Verdad y la Justicia', tipo: 'inamovible' },
-    { fecha: '2026-04-02', nombre: 'Día del Veterano y Caídos en Malvinas / Jueves Santo', tipo: 'inamovible' },
-    { fecha: '2026-04-03', nombre: 'Viernes Santo', tipo: 'inamovible' },
-    { fecha: '2026-05-01', nombre: 'Día del Trabajador', tipo: 'inamovible' },
-    { fecha: '2026-05-25', nombre: 'Día de la Revolución de Mayo', tipo: 'inamovible' },
-    { fecha: '2026-06-13', nombre: 'Asueto — San Antonio de Padua (Patrono de Oberá)', tipo: 'asueto' },
-    { fecha: '2026-06-15', nombre: 'Paso a la Inmortalidad del Gral. Güemes', tipo: 'trasladable' },
-    { fecha: '2026-06-20', nombre: 'Paso a la Inmortalidad del Gral. Belgrano', tipo: 'inamovible' },
-    { fecha: '2026-07-09', nombre: 'Día de la Independencia', tipo: 'inamovible' },
-    { fecha: '2026-07-10', nombre: 'Día no laborable turístico', tipo: 'turístico' },
-    { fecha: '2026-08-17', nombre: 'Paso a la Inmortalidad del Gral. San Martín', tipo: 'trasladable' },
-    { fecha: '2026-10-12', nombre: 'Día del Respeto a la Diversidad Cultural', tipo: 'trasladable' },
-    { fecha: '2026-10-31', nombre: 'Asueto — Día de la Reforma Protestante', tipo: 'asueto' },
-    { fecha: '2026-11-23', nombre: 'Día de la Soberanía Nacional', tipo: 'trasladable' },
-    { fecha: '2026-12-07', nombre: 'Día no laborable turístico', tipo: 'turístico' },
-    { fecha: '2026-12-08', nombre: 'Inmaculada Concepción de María', tipo: 'inamovible' },
-    { fecha: '2026-12-25', nombre: 'Navidad', tipo: 'inamovible' },
-  ];
+const INICIO_CLASES = new Date(2026,2,2);
+const FIN_CLASES    = new Date(2026,11,4);
+const VAC_INICIO    = new Date(2026,6,13);
+const VAC_FIN       = new Date(2026,6,26);
 
-  const VAC_INICIO = new Date('2026-07-13');
-  const VAC_FIN    = new Date('2026-07-26');
-  const FIN_CLASES = new Date('2026-12-04');
+const BASE = [
+  {fecha:'2026-01-01',nombre:'Año Nuevo',tipo:'inamovible'},
+  {fecha:'2026-02-16',nombre:'Carnaval',tipo:'inamovible'},
+  {fecha:'2026-02-17',nombre:'Carnaval',tipo:'inamovible'},
+  {fecha:'2026-03-23',nombre:'Día no laborable turístico',tipo:'turístico'},
+  {fecha:'2026-03-24',nombre:'Día Nac. de la Memoria por la Verdad y la Justicia',tipo:'inamovible'},
+  {fecha:'2026-04-02',nombre:'Veteranos de Malvinas / Jueves Santo',tipo:'inamovible'},
+  {fecha:'2026-04-03',nombre:'Viernes Santo',tipo:'inamovible'},
+  {fecha:'2026-05-01',nombre:'Día del Trabajador',tipo:'inamovible'},
+  {fecha:'2026-05-25',nombre:'Día de la Revolución de Mayo',tipo:'inamovible'},
+  {fecha:'2026-06-13',nombre:'Asueto — San Antonio de Padua (Patrono de Oberá)',tipo:'asueto'},
+  {fecha:'2026-06-15',nombre:'Paso a la Inmortalidad del Gral. Güemes',tipo:'trasladable'},
+  {fecha:'2026-06-20',nombre:'Paso a la Inmortalidad del Gral. Belgrano',tipo:'inamovible'},
+  {fecha:'2026-07-09',nombre:'Día de la Independencia',tipo:'inamovible'},
+  {fecha:'2026-07-10',nombre:'Día no laborable turístico',tipo:'turístico'},
+  {fecha:'2026-08-17',nombre:'Paso a la Inmortalidad del Gral. San Martín',tipo:'trasladable'},
+  {fecha:'2026-10-12',nombre:'Día del Respeto a la Diversidad Cultural',tipo:'trasladable'},
+  {fecha:'2026-10-31',nombre:'Asueto — Día de la Reforma Protestante',tipo:'asueto'},
+  {fecha:'2026-11-23',nombre:'Día de la Soberanía Nacional',tipo:'trasladable'},
+  {fecha:'2026-12-07',nombre:'Día no laborable turístico',tipo:'turístico'},
+  {fecha:'2026-12-08',nombre:'Inmaculada Concepción de María',tipo:'inamovible'},
+  {fecha:'2026-12-25',nombre:'Navidad',tipo:'inamovible'},
+];
 
-  // ========== HELPERS ==========
-  function hoy() {
-    const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+function hoy()        { const d=new Date(); return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
+function pd(s)        { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function diff(f)      { return Math.ceil((f-hoy())/86400000); }
+function strL(d)      { return `${DIAS_S[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`; }
+
+// TEMA
+const themeBtn = document.getElementById('theme-btn');
+const sysDark  = window.matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme',t);
+  themeBtn.textContent = t==='dark' ? '☀️' : '🌙';
+  localStorage.setItem('theme',t);
+}
+applyTheme(localStorage.getItem('theme') || (sysDark.matches?'dark':'light'));
+themeBtn.addEventListener('click',()=>{
+  applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+});
+sysDark.addEventListener('change',e=>{ if(!localStorage.getItem('theme')) applyTheme(e.matches?'dark':'light'); });
+
+// MODO VACACIONES
+(function(){
+  const h=hoy();
+  if(h>=VAC_INICIO&&h<=VAC_FIN){
+    document.documentElement.setAttribute('data-mode','vacation');
+    document.getElementById('vac-top-dias').textContent = diff(new Date(VAC_FIN.getTime()+86400000));
+  }
+})();
+
+// BANNER DÍA LIBRE
+(function(){
+  const h=hoy(), hStr=h.toISOString().slice(0,10);
+  const todos=getAllFeriados();
+  const esLibre=todos.find(f=>f.fecha===hStr);
+  if(esLibre){
+    const mensajes=[
+      `🎉 ¡Hoy estás libre! Que disfrutes, Nico.`,
+      `☀️ ¡Día libre! Descansá y recargá energías.`,
+      `🥳 ¡Hoy no hay clases! Aprovechalo al máximo.`,
+      `🎈 ¡Hoy es ${esLibre.nombre.replace('Asueto — ','')}! Que lo pases genial.`,
+      `😎 ¡Día libre, Nico! Merece la pena disfrutarlo.`,
+    ];
+    const msg=mensajes[Math.floor(Math.random()*mensajes.length)];
+    const banner=document.getElementById('dia-libre-banner');
+    banner.textContent=msg;
+    banner.style.display='block';
+    banner.style.background='linear-gradient(135deg,var(--accent),var(--accent2))';
+    banner.style.color='var(--bg)';
+  }
+})();
+
+// FECHA HOY
+document.getElementById('hoy-fecha').textContent = strL(hoy());
+
+// PROGRESO
+(function(){
+  const h=hoy(), total=FIN_CLASES-INICIO_CLASES;
+  const trans=Math.max(0,Math.min(h-INICIO_CLASES,total));
+  const pct=Math.round(trans/total*100);
+  const semT=Math.ceil(total/(7*86400000));
+  const semP=Math.max(0,Math.ceil(trans/(7*86400000)));
+  setTimeout(()=>{ document.getElementById('progreso-bar').style.width=pct+'%'; },250);
+  document.getElementById('progreso-pct').textContent=pct+'%';
+  document.getElementById('semanas-info').textContent=`Semana ${semP} de ${semT}`;
+})();
+
+// STORAGE
+function loadExtra(){ try{ return JSON.parse(localStorage.getItem('asuetos')||'[]'); } catch{ return []; } }
+function saveExtra(a){ localStorage.setItem('asuetos',JSON.stringify(a)); }
+
+function getAllFeriados(){
+  const extra=loadExtra().map(e=>({...e,tipo:'asueto',custom:true}));
+  return [...BASE,...extra].sort((a,b)=>a.fecha.localeCompare(b.fecha));
+}
+
+function render(){
+  const feriados=getAllFeriados();
+  const h=hoy(), hTs=h.getTime();
+  const conF=feriados.map(f=>({...f,dateObj:pd(f.fecha)}));
+  const fut=conF.filter(f=>f.dateObj.getTime()>=hTs);
+
+  // HERO próximo
+  if(fut.length>0){
+    const p=fut[0], d=diff(p.dateObj);
+    document.getElementById('h-dias').innerHTML=`${d}<span class="unit">días</span>`;
+    document.getElementById('h-nombre').textContent=p.nombre;
+    document.getElementById('h-fecha').textContent=strL(p.dateObj);
   }
 
-  function parseDate(str) {
-    const [y, m, d] = str.split('-').map(Number);
-    return new Date(y, m - 1, d);
-  }
-
-  function diasDiferencia(fechaFutura) {
-    const diff = fechaFutura - hoy();
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
-  }
-
-  function formatFechaLarga(d) {
-    return `${DIAS_SEMANA[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`;
-  }
-
-  function formatFechaCorta(d) {
-    return `${d.getDate()} de ${MESES[d.getMonth()]}`;
-  }
-
-  // ========== RENDER FECHA HOY ==========
-  document.getElementById('hoy-fecha').textContent = formatFechaLarga(hoy());
-
-  // ========== HERO CARDS ==========
-  const hoyTs = hoy().getTime();
-  const feriadosFuturos = feriados
-    .map(f => ({ ...f, dateObj: parseDate(f.fecha) }))
-    .filter(f => f.dateObj.getTime() >= hoyTs);
-
-  // Próximo feriado
-  if (feriadosFuturos.length > 0) {
-    const proximo = feriadosFuturos[0];
-    const dias = diasDiferencia(proximo.dateObj);
-    const cardDias = document.getElementById('card-proximo-dias');
-    if (dias === 0) {
-      const badge = document.createElement('div');
-      badge.className = 'badge-today';
-      badge.textContent = '¡Hoy!';
-      document.getElementById('card-proximo').prepend(badge);
-      cardDias.innerHTML = '0<span class="unit">días</span>';
-    } else {
-      cardDias.innerHTML = `${dias}<span class="unit">días</span>`;
-    }
-    document.getElementById('card-proximo-nombre').textContent = proximo.nombre;
-    document.getElementById('card-proximo-fecha').textContent = formatFechaLarga(proximo.dateObj);
-  }
-
-  // Vacaciones de invierno
-  const diasVac = diasDiferencia(VAC_INICIO);
-  const cardVacDias = document.getElementById('card-invierno-dias');
-  if (hoy() >= VAC_INICIO && hoy() <= VAC_FIN) {
-    cardVacDias.innerHTML = '¡Ya!<span class="unit"> </span>';
-  } else if (hoy() > VAC_FIN) {
-    cardVacDias.innerHTML = '✓<span class="unit"> </span>';
+  // HERO vacaciones
+  const wEl=document.getElementById('w-dias');
+  if(h>=VAC_INICIO&&h<=VAC_FIN){
+    wEl.innerHTML='¡Ya!<span class="unit"> </span>';
+    document.getElementById('w-nombre').textContent='¡Estás de vacaciones!';
+  } else if(h>VAC_FIN){
+    wEl.innerHTML='✓<span class="unit"> </span>';
   } else {
-    cardVacDias.innerHTML = `${diasVac}<span class="unit">días</span>`;
+    wEl.innerHTML=`${diff(VAC_INICIO)}<span class="unit">días</span>`;
   }
 
-  // Fin de clases
-  const diasFin = diasDiferencia(FIN_CLASES);
-  const cardFinDias = document.getElementById('card-fin-dias');
-  if (hoy() >= FIN_CLASES) {
-    cardFinDias.innerHTML = '✓<span class="unit"> </span>';
+  // HERO fin clases
+  const eEl=document.getElementById('e-dias');
+  eEl.innerHTML=h>=FIN_CLASES?'✓<span class="unit"> </span>':`${diff(FIN_CLASES)}<span class="unit">días</span>`;
+
+  // VAC banner
+  const vn=document.getElementById('vac-num'), vl=document.getElementById('vac-lbl');
+  if(h>=VAC_INICIO&&h<=VAC_FIN){
+    vn.textContent=diff(new Date(VAC_FIN.getTime()+86400000));
+    vn.style.color='var(--green)'; vl.textContent='días restantes de vacaciones';
+  } else if(h>VAC_FIN){
+    vn.textContent='✓'; vn.style.color='var(--muted)'; vl.textContent='vacaciones terminadas';
   } else {
-    cardFinDias.innerHTML = `${diasFin}<span class="unit">días</span>`;
+    vn.textContent=diff(VAC_INICIO); vl.textContent='días para el inicio';
   }
 
-  // Banner vacaciones
-  const vacNum = document.getElementById('vac-invierno-num');
-  const vacLabel = document.getElementById('vac-invierno-label');
-  if (hoy() >= VAC_INICIO && hoy() <= VAC_FIN) {
-    const restantes = diasDiferencia(new Date(VAC_FIN.getTime() + 86400000));
-    vacNum.textContent = restantes;
-    vacLabel.textContent = 'días restantes de vacaciones';
-    vacNum.style.color = 'var(--green)';
-  } else if (hoy() > VAC_FIN) {
-    vacNum.textContent = '✓';
-    vacLabel.textContent = 'vacaciones terminadas';
-    vacNum.style.color = 'var(--muted)';
-  } else {
-    vacNum.textContent = diasVac;
-    vacLabel.textContent = 'días para el inicio';
-  }
+  // PRÓXIMOS 3
+  const pw=document.getElementById('proximos-wrap'); pw.innerHTML='';
+  fut.slice(0,3).forEach(f=>{
+    const d=diff(f.dateObj), div=document.createElement('div');
+    div.className='proximo-item';
+    div.innerHTML=`<div class="proximo-num">${d}<small>días</small></div>
+      <div class="proximo-info">
+        <p class="nombre">${f.nombre}</p>
+        <p class="fecha-str">${strL(f.dateObj)}</p>
+      </div>`;
+    pw.appendChild(div);
+  });
 
-  // ========== LISTA FERIADOS ==========
-  const lista = document.getElementById('feriados-lista');
+  // LISTA
+  const lista=document.getElementById('feriados-lista'); lista.innerHTML='';
+  const proxF=fut.length>0?fut[0].fecha:null;
+  const tipoMap={inamovible:'inamovible',trasladable:'trasladable','turístico':'turístico',asueto:'asueto inst.'};
 
-  feriados.forEach((f, i) => {
-    const fechaObj = parseDate(f.fecha);
-    const dias = diasDiferencia(fechaObj);
-    const esPasado = fechaObj < hoy();
-    const esHoy = fechaObj.getTime() === hoy().getTime();
-    const esProximo = !esPasado && !esHoy && feriadosFuturos[0] && feriadosFuturos[0].fecha === f.fecha;
-
-    const item = document.createElement('div');
-    item.className = 'feriado-item' +
-      (esPasado ? ' pasado' : '') +
-      (esHoy ? ' hoy' : '') +
-      (esProximo ? ' proximo' : '') +
-      (f.tipo === 'asueto' ? ' asueto' : '');
-
-    const diasDisplay = esPasado ? '—' : (esHoy ? '0' : dias);
-    const diasLabelStr = esPasado ? '' : (esHoy ? 'hoy' : 'días');
-
-    let tipoLabel = '';
-    if (f.tipo === 'inamovible') tipoLabel = 'inamovible';
-    else if (f.tipo === 'trasladable') tipoLabel = 'trasladable';
-    else if (f.tipo === 'turístico') tipoLabel = 'turístico';
-    else if (f.tipo === 'asueto') tipoLabel = 'asueto inst.';
-
-    item.innerHTML = `
+  conF.forEach(f=>{
+    const ts=f.dateObj.getTime();
+    const esPas=ts<hTs, esHoy=ts===hTs, esProx=!esPas&&!esHoy&&f.fecha===proxF;
+    const d=diff(f.dateObj);
+    const div=document.createElement('div');
+    div.className='feriado-item'+(esPas?' pasado':'')+(esHoy?' hoy':'')+(esProx?' proximo':'')+(f.tipo==='asueto'?' asueto':'');
+    div.innerHTML=`
       <div>
-        <div class="feriado-numero">${diasDisplay}</div>
-        <div class="feriado-dias-label">${diasLabelStr}</div>
+        <div class="feriado-num">${esPas?'—':(esHoy?'0':d)}</div>
+        <div class="feriado-dias-lbl">${esPas?'':(esHoy?'hoy':'días')}</div>
       </div>
       <div class="feriado-info">
         <p class="feriado-nombre">${f.nombre}</p>
-        <p class="feriado-fecha-str">${formatFechaLarga(fechaObj)}</p>
+        <p class="feriado-fecha-str">${strL(f.dateObj)}</p>
       </div>
-      <span class="feriado-tipo">${tipoLabel}</span>
-    `;
-
-    lista.appendChild(item);
+      <span class="feriado-tipo">${tipoMap[f.tipo]||f.tipo}</span>
+      ${f.custom?`<button class="delete-btn" data-fecha="${f.fecha}">✕</button>`:''}`;
+    lista.appendChild(div);
   });
 
-  // ========== FOOTER ==========
-  const now = new Date();
-  document.getElementById('footer-update').textContent =
-    `Actualizado: ${now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}`;
+  lista.querySelectorAll('.delete-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      saveExtra(loadExtra().filter(e=>e.fecha!==btn.dataset.fecha));
+      render();
+    });
+  });
+}
+
+// FORMULARIO
+document.getElementById('agregar-toggle').addEventListener('click',function(){
+  this.classList.toggle('open');
+  document.getElementById('agregar-form').classList.toggle('visible');
+});
+document.getElementById('agregar-btn').addEventListener('click',()=>{
+  const fecha=document.getElementById('input-fecha').value;
+  const nombre=document.getElementById('input-nombre').value.trim();
+  if(!fecha||!nombre) return;
+  const extra=loadExtra();
+  if(!extra.find(e=>e.fecha===fecha&&e.nombre===nombre)){
+    extra.push({fecha,nombre}); saveExtra(extra);
+  }
+  document.getElementById('input-fecha').value='';
+  document.getElementById('input-nombre').value='';
+  document.getElementById('agregar-toggle').classList.remove('open');
+  document.getElementById('agregar-form').classList.remove('visible');
+  render();
+});
+
+// FOOTER
+const n=new Date();
+document.getElementById('footer-update').textContent=
+  `Actualizado: ${n.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}`;
+
+render();
 </script>
 </body>
-  </html>
-    
+</html>
