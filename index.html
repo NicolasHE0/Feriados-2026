@@ -462,6 +462,12 @@ footer p {
 
 <div class="feriados-grid" id="feriados-lista"></div>
 
+<div class="section-title"><h2>Frase del día</h2></div>
+<div id="frase-wrap" style="position:relative;z-index:1;margin:0 40px 0;padding:28px 32px;background:var(--surface);border:1px solid var(--border);border-radius:4px;transition:background var(--transition),border-color var(--transition);">
+  <p id="frase-texto" style="font-family:'Playfair Display',serif;font-size:clamp(16px,2vw,22px);font-weight:700;color:var(--text);line-height:1.45;margin-bottom:10px;transition:color var(--transition);"></p>
+  <p id="frase-autor" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;transition:color var(--transition);"></p>
+</div>
+
 <footer>
   <p>Instituto Privado Emanuel <span class="dot">·</span> 3° Economía <span class="dot">·</span> Año Lectivo 2026</p>
   <p id="footer-update">—</p>
@@ -679,6 +685,48 @@ document.getElementById('agregar-btn').addEventListener('click',()=>{
   document.getElementById('agregar-form').classList.remove('visible');
   render();
 });
+
+// FRASE DIARIA
+(function(){
+  const frases=[
+    {texto:"La educación es el arma más poderosa que puedes usar para cambiar el mundo.",autor:"Nelson Mandela"},
+    {texto:"El éxito es la suma de pequeños esfuerzos repetidos día tras día.",autor:"Robert Collier"},
+    {texto:"No esperes el momento perfecto. Toma el momento y hazlo perfecto.",autor:"Anónimo"},
+    {texto:"Aprender sin pensar es un trabajo perdido; pensar sin aprender es peligroso.",autor:"Confucio"},
+    {texto:"El conocimiento es poder.",autor:"Francis Bacon"},
+    {texto:"Cada día es una nueva oportunidad para aprender algo nuevo.",autor:"Anónimo"},
+    {texto:"La perseverancia es la clave del éxito.",autor:"Anónimo"},
+    {texto:"Estudia no para saber más, sino para ignorar menos.",autor:"Sor Juana Inés de la Cruz"},
+    {texto:"El único lugar donde el éxito viene antes que el trabajo es en el diccionario.",autor:"Vidal Sassoon"},
+    {texto:"No te rindas, por favor no cedas, aunque el frío queme, aunque el miedo muerda.",autor:"Mario Benedetti"},
+    {texto:"La imaginación es más importante que el conocimiento.",autor:"Albert Einstein"},
+    {texto:"Todo lo que puedes imaginar es real.",autor:"Pablo Picasso"},
+    {texto:"Vive como si fueras a morir mañana. Aprende como si fueras a vivir para siempre.",autor:"Mahatma Gandhi"},
+    {texto:"El talento gana juegos, pero el trabajo en equipo y la inteligencia ganan campeonatos.",autor:"Michael Jordan"},
+    {texto:"No cuentes los días, haz que los días cuenten.",autor:"Muhammad Ali"},
+    {texto:"El secreto de salir adelante es comenzar.",autor:"Mark Twain"},
+    {texto:"Lo que sabemos es una gota; lo que ignoramos es un océano.",autor:"Isaac Newton"},
+    {texto:"La disciplina es el puente entre las metas y los logros.",autor:"Jim Rohn"},
+    {texto:"Un año de aquí, desearás haber empezado hoy.",autor:"Karen Lamb"},
+    {texto:"El camino al éxito y el camino al fracaso son casi exactamente el mismo.",autor:"Colin R. Davis"},
+    {texto:"Si puedes soñarlo, puedes lograrlo.",autor:"Walt Disney"},
+    {texto:"No es la montaña que debemos conquistar, sino a nosotros mismos.",autor:"Edmund Hillary"},
+    {texto:"El aprendizaje es un tesoro que seguirá a su dueño a todas partes.",autor:"Proverbio chino"},
+    {texto:"Los que dicen que algo es imposible no deberían interrumpir a los que lo están haciendo.",autor:"Anónimo"},
+    {texto:"Haz de cada día tu obra maestra.",autor:"John Wooden"},
+    {texto:"No hay nada noble en ser superior a otro hombre. La verdadera nobleza está en ser superior a tu yo anterior.",autor:"Ernest Hemingway"},
+    {texto:"El futuro pertenece a quienes creen en la belleza de sus sueños.",autor:"Eleanor Roosevelt"},
+    {texto:"La única forma de hacer un gran trabajo es amar lo que haces.",autor:"Steve Jobs"},
+    {texto:"La educación no es preparación para la vida; la educación es la vida en sí misma.",autor:"John Dewey"},
+    {texto:"Cae siete veces, levántate ocho.",autor:"Proverbio japonés"},
+    {texto:"Esfuérzate no para tener éxito, sino para ser de valor.",autor:"Albert Einstein"},
+  ];
+  const h=hoy();
+  const diaDelAño=Math.floor((h-new Date(h.getFullYear(),0,0))/86400000);
+  const f=frases[diaDelAño % frases.length];
+  document.getElementById('frase-texto').textContent=`"${f.texto}"`;
+  document.getElementById('frase-autor').textContent=`— ${f.autor}`;
+})();
 
 // FOOTER
 const n=new Date();
